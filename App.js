@@ -1,20 +1,84 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View, FlatList, Button } from "react-native";
+import { useState } from "react";
+import GoalItem from "./components/GoalItem";
+import GoalInputs from "./components/GoalInput";
+import { StatusBar } from "expo-status-bar";
 
 export default function App() {
+  const [modalVisble, setModalVisible] = useState(false);
+  const [courseGoals, setCourseGoals] = useState([]);
+
+  function startAddGoalHanlder() {
+    setModalVisible(true);
+  }
+
+  function endAddGoalHandler() {
+    setModalVisible(false);
+  }
+
+  function addGoalHandler(enteredGoalText) {
+    setCourseGoals((currentCourseGoals) => [
+      ...courseGoals,
+      { text: enteredGoalText, id: Math.random().toString() },
+    ]);
+    endAddGoalHandler();
+  }
+
+  function deleteGoalHandler(id) {
+    setCourseGoals((currentCourseGoals) => {
+      return currentCourseGoals.filter((goal) => goal.id !== id);
+    });
+  }
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style="light" />
+      <View style={styles.appContainer}>
+        <View style={styles.button}>
+          <Button
+            title="Add new Goal"
+            onPress={startAddGoalHanlder}
+            color="white"
+          />
+        </View>
+        <GoalInputs
+          onAddGoal={addGoalHandler}
+          visible={modalVisble}
+          onCancel={endAddGoalHandler}
+        />
+        <View style={styles.goalsContainer}>
+          <FlatList
+            data={courseGoals}
+            renderItem={(itemData) => {
+              return (
+                <GoalItem
+                  text={itemData.item.text}
+                  id={itemData.item.id}
+                  onDeleteItem={deleteGoalHandler}
+                />
+              );
+            }}
+            keyExtractor={(item, index) => {
+              return item.id;
+            }}
+            alwaysBounceVertical={false}
+          ></FlatList>
+        </View>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  appContainer: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 50,
+    paddingHorizontal: 16,
+    backgroundColor: "#1e085a",
+  },
+  button: {
+    marginTop: 20,
+  },
+  goalsContainer: {
+    flex: 5,
   },
 });
